@@ -2,6 +2,33 @@ import shutil
 import os
 import pandas as pd
 import numpy as np
+from tempfile import NamedTemporaryFile
+import webbrowser
+
+base_html = """
+<!doctype html>
+<html><head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+</head><body>%s<script type="text/javascript">$(document).ready(function(){$('table').DataTable({
+    "pageLength": 50
+});});</script>
+</body></html>
+"""
+
+def df_html(df):
+    """HTML table with pagination and other goodies"""
+    df_html = df.to_html()
+    return base_html % df_html
+
+def df_window(df):
+    """Open dataframe in browser window using a temporary file"""
+    with NamedTemporaryFile(delete=False, suffix='.html') as f:
+        f.write(df_html(df))
+    webbrowser.open(f.name)
+
 
 INITIAL_FILTER_Y = 807
 FILTER_OFFSET_Y = 30
@@ -88,8 +115,9 @@ def load_shortlist():
                 sides = list(p[1].replace('(','').replace(')',''))
 
             for posit in posits:
-                for side in sides:
-                    player_pos.append('%s (%s)' % (posit, side))
+                if posit != '-':
+                    for side in sides:
+                        player_pos.append('%s%s' % (posit, side))
 
         return ', '.join(player_pos)
 
@@ -136,18 +164,28 @@ def is_position(positions, pos):
             return True
     return False
 
+ALL_POSITIONS = ['GKC', 'DL', 'DR', 'DC', 'WBL', 'WBR', 'DMC', 'ML', 'MR', 'MC', 'AML', 'AMR', 'AMC', 'STC']
 
 def scouting_report(shortlist, positions = [], youth_importance = 0.5):
     pos_weights = pd.read_excel('PosWeights.ods', engine='odf')
 
-    weights = pos_weights.loc[lambda df: (df['Player Position'] == 'D') & (df['Side'] == 'L'), :]
+    shortlist['Main Pos.'] = shortlist['Position'].apply(lambda pos: pos.split(', ')[0])
 
-    shortlist['Main Pos.'] = shortlist['Position'].apply(lambda pos: pos.split(', ')[0].split(' ')[0] + pos.split(', ')[0].split(' ')[1].replace('(', '').replace(')', ''))
+    for position in positions:
+        weights = pos_weights.loc[lambda df: (df['Pos+Side'] == position), :]
+        attributes = shortlist.columns.intersection(weights.columns)
 
-    attributes = shortlist.columns.intersection(weights.columns)
+        relative_weights = weights[attributes].div(weights[attributes].sum(axis=1), axis=0)
 
-    shortlist[attributes] = shortlist[attributes].mul(np.array(weights[attributes]), axis='columns', fill_value=0)
+        position_shortlist = shortlist.loc[shortlist['Position'].str.contains(position) | shortlist['Sec. Position'].str.contains(position)]
+        position_shortlist = position_shortlist.copy()
 
-    return shortlist
+        position_shortlist[attributes] = position_shortlist[attributes].mul(np.array(relative_weights), axis='columns', fill_value=0)
 
-print(scouting_report(load_shortlist(), positions=['DL']))
+        position_shortlist['POSITIONAL DNA'] = position_shortlist[attributes].sum(axis=1) * 5
+
+        weights['Influence Weight']
+
+    return position_shortlist
+
+df_window(scouting_report(load_shortlist(), positions=['DL']))
