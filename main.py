@@ -47,9 +47,42 @@ def scout():
         extract_scouting(filter_id)
 
 
+def foot_to_int(foot):
+    foots = {
+        'Very Strong': 1,
+        'Strong': 0.8,
+        'Fairly Strong': 0.6,
+        'Reasonable': 0.4,
+        'Weak': 0.2,
+        'Very Weak': 0,
+    }
+    return foots[foot]
 
-df_list = pd.read_html('scouting1.html')
+def position_to_str(pos):
+    player_pos = []
+    positions = pos.split(', ')
 
-for i, df in enumerate(df_list):
-    print(df)
-    df.to_csv('table {}.csv'.format(i))
+    for p in positions:
+        p = p.split(' ')
+        posits = p[0].split('/')
+
+        sides = ['C']        
+        if len(p) > 1:
+            sides = list(p[1].replace('(','').replace(')',''))
+
+        for posit in posits:
+            for side in sides:
+                player_pos.append('%s (%s)' % (posit, side))
+
+    return ', '.join(player_pos)
+
+
+def df_apply_column(column, function):
+    scouting_list[column] = scouting_list[column].apply(function)
+
+scouting_list = pd.read_html('scouting1.html', header=0)[0]
+df_apply_column('Left Foot', foot_to_int)
+df_apply_column('Right Foot', foot_to_int)
+df_apply_column('Position', position_to_str)
+df_apply_column('Sec. Position', position_to_str)
+print(scouting_list)
