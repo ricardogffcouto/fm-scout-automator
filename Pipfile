@@ -13,6 +13,7 @@ python-xlib = "*"
 pyautogui = "*"
 pandas = "*"
 lxml = "*"
+odfpy = "*"
 
 [dev-packages]
 
