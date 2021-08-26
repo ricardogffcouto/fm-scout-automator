@@ -3,39 +3,7 @@ import numpy as np
 import webbrowser
 import glob
 import os
-
-
-MAIN_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
-
-PERSONALITY_WEIGHTS = {
-    'Model Citizen, Resolute, Model Professional, Driven, Iron Willed': 0.2,
-    'Perfectionist, Professional, Fairly Professional, Spirited, Very Ambitious, Ambitious, Determined, Fairly Determined, Charismatic Leader, Born Leader, Leader, Resilient': 0.05,
-    'Jovial, Light Hearted, Devoted / Very Loyal, Loyal, Fairly Loyal, Honest, Sporting, Fairly Sporting, Realist, Balanced, Fairly Ambitious, Light-Hearted': 0,
-    'Unsporting, Slack, Casual, Temperamental, Unambitious, Easily Discouraged, Low Determination, Spineless, Low Self Belief, Mercenary, Fickle': -0.2,
-}
-
-ATTRIBUTE_CATEGORIES = {
-    'Intel': ['Ant', 'Cmp', 'Cnt', 'Dec', 'OtB', 'Pos', 'Vis'],
-    'Work': ['Agg', 'Bra', 'Det', 'Tea', 'Wor', 'Nat', 'Sta'],
-    'Def': ['Agg', 'Ant', 'Bra', 'Cmp', 'Cnt', 'Det', 'Pos', 'Tea', 'Acc', 'Jum', 'Str'],
-    'Atk': ['Tec', 'Ant', 'Cmp', 'OtB', 'Acc', 'Pac'],
-    'Ginga': ['Dri', 'Tec', 'Fla', 'Acc', 'Agi', 'Pac']
-}
-
-FOOT_WEIGHTS = {
-    'Very Strong': 1,
-    'Strong': 0.8,
-    'Fairly Strong': 0.6,
-    'Reasonable': 0.4,
-    'Weak': 0.2,
-    'Very Weak': 0,
-}
-
-# ALL_POSITIONS = ['GKC', 'DL', 'DR', 'DC', 'WBL', 'WBR', 'DMC', 'ML', 'MR', 'MC', 'AML', 'AMR', 'AMC', 'STC']
-
-ALL_POSITIONS = ['GKC', 'DL', 'DR', 'DC', 'DMC', 'ML', 'MR', 'MC', 'AMC', 'STC']
-
-DECAY_OPP_FOOT = 3
+import globals as GLOB
 
 def dict_weight_parser(w_dict):
     weighted_dict = {}
@@ -46,11 +14,9 @@ def dict_weight_parser(w_dict):
     
     return weighted_dict
 
-PERSONALITIES = dict_weight_parser(PERSONALITY_WEIGHTS)
-
 
 def foot_to_num(foot):
-    return FOOT_WEIGHTS[foot]
+    return GLOB.FOOT_WEIGHTS[foot]
 
 
 def position_to_str(pos):
@@ -72,16 +38,17 @@ def position_to_str(pos):
 
     return ', '.join(player_pos)
 
+personalities = dict_weight_parser(GLOB.PERSONALITY_WEIGHTS)
 
 def personality_to_num(per):
-    return PERSONALITIES[per]
+    return personalities[per]
 
 
 def get_shortlist():
     def shortlist_apply_column(shortlist, column, function):
         shortlist[column] = shortlist[column].apply(function)
 
-    shortlist_names = glob.glob(os.path.join(MAIN_PATH, 'shortlists/*'))
+    shortlist_names = glob.glob(os.path.join(GLOB.MAIN_PATH, 'shortlists/*'))
 
     all_shortlists = []
 
@@ -102,8 +69,8 @@ def get_shortlist():
         shortlist['Footedness'] = shortlist['Right Foot'] - shortlist['Left Foot']
         shortlist['Youth Factor'] = np.minimum(np.maximum(1 - (shortlist['Age'] - 23) / 20, 0), 1)
 
-        for category in ATTRIBUTE_CATEGORIES.keys():
-            shortlist[category] = shortlist[ATTRIBUTE_CATEGORIES[category]].sum(axis=1) / len(ATTRIBUTE_CATEGORIES[category])
+        for category in GLOB.ATTRIBUTE_CATEGORIES.keys():
+            shortlist[category] = shortlist[GLOB.ATTRIBUTE_CATEGORIES[category]].sum(axis=1) / len(GLOB.ATTRIBUTE_CATEGORIES[category])
 
         all_shortlists.append(shortlist)
 
@@ -122,8 +89,8 @@ def influence(teamwork, leadership, personality, position_influence_weight):
     return 1 + ((teamwork + leadership) / (20 * 2)) * personality * position_influence_weight
 
 
-def scouting_report(shortlist, positions = ALL_POSITIONS, youth_bonus = 1, player_amount = 20):
-    pos_weights = pd.read_excel(os.path.join(MAIN_PATH, 'data', 'PosWeights.ods'), engine='odf')
+def scouting_report(shortlist, positions = GLOB.ALL_POSITIONS, youth_bonus = GLOB.YOUTH_BONUS):
+    pos_weights = pd.read_excel(os.path.join(GLOB.MAIN_PATH, 'data', 'PosWeights.ods'), engine='odf')
 
     scouting_reports = []
 
@@ -147,7 +114,7 @@ def scouting_report(shortlist, positions = ALL_POSITIONS, youth_bonus = 1, playe
             position_shortlist['Footedness'],
             weights['Pos Footedness'].iloc[0],
             weights['Two Foot Bonus'].iloc[0],
-            DECAY_OPP_FOOT,
+            GLOB.DECAY_OPP_FOOT,
         )
 
         scouting_shortlist['YOUTH DNA'] = (position_shortlist['Youth Factor'] * youth_bonus - 1)
@@ -162,7 +129,7 @@ def scouting_report(shortlist, positions = ALL_POSITIONS, youth_bonus = 1, playe
         scouting_shortlist['TOTAL'] = ((scouting_shortlist['POSITIONAL DNA'] + scouting_shortlist['FOOT DNA'] + scouting_shortlist['YOUTH DNA']) * scouting_shortlist['INFLUENCE'])
 
         info_columns = ['Name','TOTAL', 'TOTAL FOR POS', 'Age']
-        attribute_columns = list(ATTRIBUTE_CATEGORIES.keys())
+        attribute_columns = list(GLOB.ATTRIBUTE_CATEGORIES.keys())
         personality_columns = ['Personality', 'Pers. Factor']
         dna_columns = ['POSITIONAL DNA','FOOT DNA','YOUTH DNA']
 
@@ -181,7 +148,7 @@ def scouting_report(shortlist, positions = ALL_POSITIONS, youth_bonus = 1, playe
 
 def view_report(report):
     id = 'position'
-    report_path = os.path.join(MAIN_PATH, 'scouting_report.html')
+    report_path = os.path.join(GLOB.MAIN_PATH, 'scouting_report.html')
 
     header = '''
         <head>

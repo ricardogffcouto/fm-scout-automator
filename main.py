@@ -1,5 +1,5 @@
-import src.shortlister as sh
-import src.scouter as sc
+import shortlister as sh
+import scouter as sc
 
 sh.import_shortlists()
 shortlist = sc.get_shortlist()
