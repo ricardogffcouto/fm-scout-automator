@@ -5,6 +5,7 @@ INITIAL_FILTER_Y = 807
 FILTER_OFFSET_Y = 30
 NUM_FILTERS = 4
 
+MAIN_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
 
 def activate_fm():
     window_id = os.popen("xdotool search --name 'Football Manager 2019 Touch'").read()
@@ -41,13 +42,13 @@ def extract_shortlist(filter_id):
     sleep()
 
     src_path = '/home/ricardo/.steam/steam/steamapps/compatdata/872820/pfx/drive_c/users/steamuser/My Documents/Sports Interactive/Football Manager 2019 Touch/Untitled.html'
-    dst_path = './shortlists/shortlist_%s.html' % filter_id
+    dst_path = os.path.join(MAIN_PATH, 'data', 'shortlist_%s.html' % filter_id)
     shutil.move(src_path, dst_path)
 
-def create_shortlist():
+def import_shortlists():
     activate_fm()
     for filter_id in range(NUM_FILTERS):
         extract_shortlist(filter_id)
 
-if __name__ == "__main__":
-    create_shortlist()
+if __name__ == 'main':
+    import_shortlists()
