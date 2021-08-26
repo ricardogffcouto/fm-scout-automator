@@ -2,32 +2,6 @@ import shutil
 import os
 import pandas as pd
 import numpy as np
-from tempfile import NamedTemporaryFile
-import webbrowser
-
-base_html = """
-<!doctype html>
-<html><head>
-<meta http-equiv="Content-type" content="text/html; charset=utf-8">
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
-</head><body>%s<script type="text/javascript">$(document).ready(function(){$('table').DataTable({
-    "pageLength": 50
-});});</script>
-</body></html>
-"""
-
-def df_html(df):
-    """HTML table with pagination and other goodies"""
-    df_html = df.to_html()
-    return base_html % df_html
-
-def df_window(df):
-    """Open dataframe in browser window using a temporary file"""
-    with NamedTemporaryFile(delete=False, suffix='.html') as f:
-        f.write(df_html(df))
-    webbrowser.open(f.name)
 
 
 INITIAL_FILTER_Y = 807
@@ -164,7 +138,14 @@ def is_position(positions, pos):
             return True
     return False
 
+def positional_footedness(player_footedness, position_footedness, two_foot_bonus, decay_opp_foot):
+    player_two_foot_bonus = (1 - abs(player_footedness)) * two_foot_bonus
+    player_decay_opp_foot = np.minimum(player_footedness * position_footedness, 0) * decay_opp_foot
+    return player_two_foot_bonus + player_decay_opp_foot
+
 ALL_POSITIONS = ['GKC', 'DL', 'DR', 'DC', 'WBL', 'WBR', 'DMC', 'ML', 'MR', 'MC', 'AML', 'AMR', 'AMC', 'STC']
+
+DECAY_OPP_FOOT = 0.2
 
 def scouting_report(shortlist, positions = [], youth_importance = 0.5):
     pos_weights = pd.read_excel('PosWeights.ods', engine='odf')
@@ -182,10 +163,17 @@ def scouting_report(shortlist, positions = [], youth_importance = 0.5):
 
         position_shortlist[attributes] = position_shortlist[attributes].mul(np.array(relative_weights), axis='columns', fill_value=0)
 
-        position_shortlist['POSITIONAL DNA'] = position_shortlist[attributes].sum(axis=1) * 5
+        position_shortlist['POSITIONAL DNA'] = (position_shortlist[attributes].sum(axis=1)).apply(lambda x: "{0:.2f}%".format(x*5))        
+
+        position_shortlist['FOOT DNA'] = positional_footedness(
+            position_shortlist['Footedness'],
+            weights['Pos Footedness'].iloc[0],
+            weights['Two Foot Bonus'].iloc[0],
+            DECAY_OPP_FOOT,
+        )
 
         weights['Influence Weight']
 
-    return position_shortlist
+    return position_shortlist.sort_values('POSITIONAL DNA', ascending=False)
 
-df_window(scouting_report(load_shortlist(), positions=['DL']))
+print(scouting_report(load_shortlist(), positions=['DL']))
