@@ -1,65 +1,7 @@
-import shutil
-import os
 import pandas as pd
 import numpy as np
-
-
-INITIAL_FILTER_Y = 807
-FILTER_OFFSET_Y = 30
-NUM_FILTERS = 4
-
-def dict_weight_parser(w_dict):
-    weighted_dict = {}
-
-    for k in w_dict.keys():
-        for p in k.split(', '):
-            weighted_dict[p] = w_dict[k]
-    
-    return weighted_dict
-
-def activate_fm():
-    window_id = os.popen("xdotool search --name 'Football Manager 2019 Touch'").read()
-    os.system("xdotool key 'F2'")
-    os.system('xdotool windowactivate %s' % (window_id) )
-    os.system("xdotool sleep 0.5")
-
-
-def sleep():
-    os.system("xdotool sleep 0.5")
-
-
-def move_click(x, y):
-    os.system("xdotool mousemove %s %s click 1" % (x, y))
-    sleep()
-
-
-def extract_scouting(filter_id):
-    # Select filter
-    move_click(1836, 175)
-    move_click(946, 667)
-    move_click(946, INITIAL_FILTER_Y + filter_id * FILTER_OFFSET_Y)
-    move_click(1058, 586)
-    sleep()
-
-    # Open print screen menu
-    move_click(1647, 33)
-    move_click(1647, 33)
-    move_click(1647, 451)
-
-    # Print to web page
-    move_click(1041, 618)
-    move_click(1161, 764)
-    sleep()
-
-    src_path = '/home/ricardo/.steam/steam/steamapps/compatdata/872820/pfx/drive_c/users/steamuser/My Documents/Sports Interactive/Football Manager 2019 Touch/Untitled.html'
-    dst_path = './scouting1.html'
-    shutil.move(src_path, dst_path)
-
-
-def scout():
-    activate_fm()
-    for filter_id in range(NUM_FILTERS):
-        extract_scouting(filter_id)
+import webbrowser
+import glob
 
 
 PERSONALITY_WEIGHTS = {
@@ -86,67 +28,85 @@ FOOT_WEIGHTS = {
     'Very Weak': 0,
 }
 
-ALL_POSITIONS = ['GKC', 'DL', 'DR', 'DC', 'WBL', 'WBR', 'DMC', 'ML', 'MR', 'MC', 'AML', 'AMR', 'AMC', 'STC']
+# ALL_POSITIONS = ['GKC', 'DL', 'DR', 'DC', 'WBL', 'WBR', 'DMC', 'ML', 'MR', 'MC', 'AML', 'AMR', 'AMC', 'STC']
+
+ALL_POSITIONS = ['GKC', 'DL', 'DR', 'DC', 'DMC', 'ML', 'MR', 'MC', 'AMC', 'STC']
 
 DECAY_OPP_FOOT = 3
+
+def dict_weight_parser(w_dict):
+    weighted_dict = {}
+
+    for k in w_dict.keys():
+        for p in k.split(', '):
+            weighted_dict[p] = w_dict[k]
+    
+    return weighted_dict
+
+PERSONALITIES = dict_weight_parser(PERSONALITY_WEIGHTS)
 
 
 def foot_to_num(foot):
     return FOOT_WEIGHTS[foot]
 
 
+def position_to_str(pos):
+    player_pos = []
+    positions = pos.split(', ')
+
+    for p in positions:
+        p = p.split(' ')
+        posits = p[0].split('/')
+
+        sides = ['C']        
+        if len(p) > 1:
+            sides = list(p[1].replace('(','').replace(')',''))
+
+        for posit in posits:
+            if posit != '-':
+                for side in sides:
+                    player_pos.append('%s%s' % (posit, side))
+
+    return ', '.join(player_pos)
+
+
+def personality_to_num(per):
+    return PERSONALITIES[per]
+
+
 def load_shortlist():
-    def position_to_str(pos):
-        player_pos = []
-        positions = pos.split(', ')
+    def shortlist_apply_column(shortlist, column, function):
+        shortlist[column] = shortlist[column].apply(function)
 
-        for p in positions:
-            p = p.split(' ')
-            posits = p[0].split('/')
+    shortlist_names = glob.glob("./shortlists/*")
 
-            sides = ['C']        
-            if len(p) > 1:
-                sides = list(p[1].replace('(','').replace(')',''))
+    all_shortlists = []
 
-            for posit in posits:
-                if posit != '-':
-                    for side in sides:
-                        player_pos.append('%s%s' % (posit, side))
+    for shortlist_name in shortlist_names:
+        shortlist = pd.read_html(shortlist_name, header=0)[0]
 
-        return ', '.join(player_pos)
+        # Transform data
 
-    PERSONALITIES = dict_weight_parser(PERSONALITY_WEIGHTS)
+        shortlist_apply_column(shortlist, 'Left Foot', foot_to_num)
+        shortlist_apply_column(shortlist, 'Right Foot', foot_to_num)
+        shortlist_apply_column(shortlist, 'Position', position_to_str)
+        shortlist_apply_column(shortlist, 'Sec. Position', position_to_str)
+        
+        shortlist['Pers. Factor'] = shortlist['Personality'].apply(personality_to_num)
 
+        # Adding scouting data
 
-    def personality_to_num(per):
-        return PERSONALITIES[per]
+        shortlist['Footedness'] = shortlist['Right Foot'] - shortlist['Left Foot']
+        shortlist['Youth Factor'] = np.minimum(np.maximum(1 - (shortlist['Age'] - 23) / 20, 0), 1)
 
+        for category in ATTRIBUTE_CATEGORIES.keys():
+            shortlist[category] = shortlist[ATTRIBUTE_CATEGORIES[category]].sum(axis=1) / len(ATTRIBUTE_CATEGORIES[category])
 
-    def shortlist_apply_column(column, function):
-        SHORTLIST[column] = SHORTLIST[column].apply(function)
+        all_shortlists.append(shortlist)
 
+    shortlist = pd.concat(all_shortlists)
 
-    SHORTLIST = pd.read_html('scouting1.html', header=0)[0]
-
-    # Transform data
-
-    shortlist_apply_column('Left Foot', foot_to_num)
-    shortlist_apply_column('Right Foot', foot_to_num)
-    shortlist_apply_column('Position', position_to_str)
-    shortlist_apply_column('Sec. Position', position_to_str)
-    
-    SHORTLIST['Pers. Factor'] = SHORTLIST['Personality'].apply(personality_to_num)
-
-    # Adding scouting data
-
-    SHORTLIST['Footedness'] = SHORTLIST['Right Foot'] - SHORTLIST['Left Foot']
-    SHORTLIST['Youth Factor'] = np.minimum(np.maximum(1 - (SHORTLIST['Age'] - 23) / 20, 0), 1)
-
-    for category in ATTRIBUTE_CATEGORIES.keys():
-        SHORTLIST[category] = SHORTLIST[ATTRIBUTE_CATEGORIES[category]].sum(axis=1) / len(ATTRIBUTE_CATEGORIES[category])
-
-
-    return SHORTLIST
+    return shortlist
 
 
 def positional_footedness(player_footedness, position_footedness, two_foot_bonus, decay_opp_foot):
@@ -159,10 +119,10 @@ def influence(teamwork, leadership, personality, position_influence_weight):
     return 1 + ((teamwork + leadership) / (20 * 2)) * personality * position_influence_weight
 
 
-def scouting_report(shortlist, positions = [], youth_bonus = 1, player_amount = 20):
+def scouting_report(shortlist, positions = ALL_POSITIONS, youth_bonus = 1, player_amount = 20):
     pos_weights = pd.read_excel('PosWeights.ods', engine='odf')
 
-    shortlist['Main Pos.'] = shortlist['Position'].apply(lambda pos: pos.split(', ')[0])
+    scouting_reports = []
 
     for position in positions:
         weights = pos_weights.loc[lambda df: (df['Pos+Side'] == position), :]
@@ -178,8 +138,8 @@ def scouting_report(shortlist, positions = [], youth_bonus = 1, player_amount = 
 
         position_shortlist[attributes] = position_shortlist[attributes].mul(np.array(relative_weights), axis='columns', fill_value=0)
 
-        scouting_shortlist['POSITIONAL DNA'] = (position_shortlist[attributes].sum(axis=1)) * 5 
-
+        scouting_shortlist['POSITIONAL DNA'] = (position_shortlist[attributes].sum(axis=1)) * 5
+        
         scouting_shortlist['FOOT DNA'] = positional_footedness(
             position_shortlist['Footedness'],
             weights['Pos Footedness'].iloc[0],
@@ -198,16 +158,73 @@ def scouting_report(shortlist, positions = [], youth_bonus = 1, player_amount = 
 
         scouting_shortlist['TOTAL'] = ((scouting_shortlist['POSITIONAL DNA'] + scouting_shortlist['FOOT DNA'] + scouting_shortlist['YOUTH DNA']) * scouting_shortlist['INFLUENCE'])
 
-        info_columns = ['Name','Position','Sec. Position','Age']
+        info_columns = ['Name','TOTAL', 'TOTAL FOR POS', 'Age']
         attribute_columns = list(ATTRIBUTE_CATEGORIES.keys())
         personality_columns = ['Personality', 'Pers. Factor']
-        dna_columns = ['POSITIONAL DNA','FOOT DNA','YOUTH DNA', 'TOTAL']
+        dna_columns = ['POSITIONAL DNA','FOOT DNA','YOUTH DNA']
 
-        scouting_columns = info_columns + attribute_columns + personality_columns + dna_columns
+        scouting_columns = info_columns + personality_columns + attribute_columns + dna_columns
 
         scouting_shortlist[attribute_columns] = scouting_shortlist[attribute_columns].applymap(lambda x: "{0:.0f}".format(x*5))
-        scouting_shortlist[dna_columns] = scouting_shortlist[dna_columns].applymap(lambda x: "{0:.2f}%".format(x))
+        scouting_shortlist[dna_columns + ['TOTAL']] = scouting_shortlist[dna_columns + ['TOTAL']].applymap(lambda x: "{0:.2f}%".format(x))
+        scouting_shortlist['TOTAL FOR POS'] = position
 
-    return scouting_shortlist[scouting_columns].sort_values('TOTAL', ascending=False).head(player_amount)
+        scouting_reports.append(scouting_shortlist)
 
-print(scouting_report(load_shortlist(), positions=['DL']))
+    report = pd.concat(scouting_reports)
+
+    return report[scouting_columns]
+
+
+def view_report(report):
+    id = 'position'
+    header = '''
+        <head>
+            <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.0/css/jquery.dataTables.css"/>
+            <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.1.9/css/fixedHeader.dataTables.css"/>
+            <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/searchpanes/1.4.0/css/searchPanes.dataTables.css"/>
+            
+            <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+            <script type="text/javascript" src="https://cdn.datatables.net/1.11.0/js/jquery.dataTables.js"></script>
+            <script type="text/javascript" src="https://cdn.datatables.net/fixedheader/3.1.9/js/dataTables.fixedHeader.js"></script>
+            <script type="text/javascript" src="https://cdn.datatables.net/searchpanes/1.4.0/js/dataTables.searchPanes.js"></script>
+
+            <script>
+                $(document).ready( function () {
+                    $('#%s').DataTable({
+                        "order": [[ 2, "desc" ]],
+                        "iDisplayLength": 10
+                    });
+                } );
+            </script>
+
+
+        </head>
+    ''' % (id,)
+    
+    body = '''
+        <body>
+    ''' + report.to_html(table_id=id, classes='display')
+
+    style = '''
+    <style>
+        body {
+            font-family: 'Arial';
+        }
+    </style>
+    '''
+
+    close_body =  '''
+        </body>
+    '''
+
+    html_report = header + body + style + close_body
+
+    report_file = open("./scouting_report.html", "w")
+    report_file.write(html_report)
+    report_file.close()
+
+    webbrowser.open('./scouting_report.html', new=2)
+
+
+view_report(scouting_report(load_shortlist()))
