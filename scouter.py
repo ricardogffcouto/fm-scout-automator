@@ -16,32 +16,37 @@ def dict_weight_parser(w_dict):
 
 
 def foot_to_num(foot):
-    return GLOB.FOOT_WEIGHTS[foot]
+    if not pd.isna(foot):
+        return GLOB.FOOT_WEIGHTS[foot]
+    return 0
 
 
 def position_to_str(pos):
-    player_pos = []
-    positions = pos.split(', ')
+    if not pd.isna(pos):
+        player_pos = []
+        positions = pos.split(', ')
 
-    for p in positions:
-        p = p.split(' ')
-        posits = p[0].split('/')
+        for p in positions:
+            p = p.split(' ')
+            posits = p[0].split('/')
 
-        sides = ['C']        
-        if len(p) > 1:
-            sides = list(p[1].replace('(','').replace(')',''))
+            sides = ['C']        
+            if len(p) > 1:
+                sides = list(p[1].replace('(','').replace(')',''))
 
-        for posit in posits:
-            if posit != '-':
-                for side in sides:
-                    player_pos.append('%s%s' % (posit, side))
+            for posit in posits:
+                if posit != '-':
+                    for side in sides:
+                        player_pos.append('%s%s' % (posit, side))
 
-    return ', '.join(player_pos)
+        return ', '.join(player_pos)
 
 personalities = dict_weight_parser(GLOB.PERSONALITY_WEIGHTS)
 
 def personality_to_num(per):
-    return personalities[per]
+    if not pd.isna(per):
+        return personalities[per]
+    return 0
 
 
 def get_shortlist():

@@ -11,13 +11,13 @@ PERSONALITY_WEIGHTS = {
 }
 
 ATTRIBUTE_CATEGORIES = {
-    'Intel': ['Ant', 'Dec', 'Fla', 'Tea', 'Vis'],
+    'Intel': ['Ant', 'Dec', 'Tea', 'Vis'],
     'Focus': ['Cmp', 'Cnt'],
     'Endea': ['Agg', 'Bra', 'Det', 'Wor'],
-    'Cre': ['Tec', 'Ant', 'Cmp', 'OtB', 'Acc', 'Pac'],
-    'Ginga': ['Dri', 'Tec', 'Fla', 'Agi'],
-    'Speed': ['Acc', 'Pac'],
-    'FK': ['Fre'],
+    'Physi': ['Bal', 'Str', 'Jum'],
+    'Mobil': ['Acc', 'Agi', 'Pac'],
+    'Ctrl': ['Fir', 'Tec', 'Cmp'],
+    'Fit': ['Nat', 'Sta'],
 }
 
 FOOT_WEIGHTS = {
