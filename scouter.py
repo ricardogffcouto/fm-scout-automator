@@ -76,7 +76,7 @@ def get_shortlist():
 
     shortlist = pd.concat(all_shortlists)
 
-    return shortlist
+    return shortlist.drop_duplicates(subset=['UID'] )
 
 
 def positional_footedness(player_footedness, position_footedness, two_foot_bonus, decay_opp_foot):
@@ -86,8 +86,9 @@ def positional_footedness(player_footedness, position_footedness, two_foot_bonus
 
 
 def influence(teamwork, leadership, personality, position_influence_weight):
+    return personality
     return 1 + ((teamwork + leadership) / (20 * 2)) * personality * position_influence_weight
-
+    
 
 def scouting_report(shortlist, positions = GLOB.ALL_POSITIONS, youth_bonus = GLOB.YOUTH_BONUS):
     pos_weights = pd.read_excel(os.path.join(GLOB.MAIN_PATH, 'data', 'PosWeights.ods'), engine='odf')
@@ -126,7 +127,7 @@ def scouting_report(shortlist, positions = GLOB.ALL_POSITIONS, youth_bonus = GLO
             weights['Influence Weight'].iloc[0],
         )
 
-        scouting_shortlist['TOTAL'] = ((scouting_shortlist['POSITIONAL DNA'] + scouting_shortlist['FOOT DNA'] + scouting_shortlist['YOUTH DNA']) * scouting_shortlist['INFLUENCE'])
+        scouting_shortlist['TOTAL'] = scouting_shortlist['POSITIONAL DNA'] + scouting_shortlist['FOOT DNA'] + scouting_shortlist['YOUTH DNA'] + scouting_shortlist['INFLUENCE']
 
         info_columns = ['Name','TOTAL', 'TOTAL FOR POS', 'Age']
         attribute_columns = list(GLOB.ATTRIBUTE_CATEGORIES.keys())
@@ -164,8 +165,29 @@ def view_report(report):
             <script>
                 $(document).ready( function () {
                     $('#%s').DataTable({
-                        "order": [[ 2, "desc" ]],
-                        "iDisplayLength": 10
+                        order: [[ 2, "desc" ]],
+                        iDisplayLength: 10,
+                        initComplete: function () {
+                            console.log(this.api().columns())
+                            this.api().column(3).every( function () {
+                                var column = this;
+                                var select = $('<select><option value=""></option></select>')
+                                    .appendTo( $(column.header()).empty() )
+                                    .on( 'change', function () {
+                                        var val = $.fn.dataTable.util.escapeRegex(
+                                            $(this).val()
+                                        );
+                
+                                        column
+                                            .search( val ? '^'+val+'$' : '', true, false )
+                                            .draw();
+                                    } );
+                
+                                column.data().unique().sort().each( function ( d, j ) {
+                                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                                } );
+                            } );
+                        }
                     });
                 } );
             </script>

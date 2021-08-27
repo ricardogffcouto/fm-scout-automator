@@ -17,6 +17,7 @@ odfpy = "*"
 jinja2 = "*"
 panel = "*"
 html5lib = "*"
+numpy = "*"
 
 [dev-packages]
 
