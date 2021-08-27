@@ -20,6 +20,7 @@ ATTRIBUTE_CATEGORIES = {
     'Fit': ['Nat', 'Sta'],
 }
 
+
 FOOT_WEIGHTS = {
     'Very Strong': 1,
     'Strong': 0.8,
