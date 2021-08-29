@@ -19,6 +19,8 @@ ATTRIBUTE_CATEGORIES = {
     'Mobil': ['Acc', 'Agi', 'Pac'],
     'Ctrl': ['Fir', 'Tec', 'Cmp'],
     'Fit': ['Nat', 'Sta'],
+    'Infl': ['Tea', 'Ldr'],
+    'FK': ['Fre'],
 }
 
 

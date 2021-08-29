@@ -4,6 +4,7 @@ import webbrowser
 import glob
 import os
 import globals as GLOB
+from scipy.stats.mstats import gmean
 
 
 def dict_weight_parser(w_dict):
@@ -92,9 +93,7 @@ def positional_footedness(player_footedness, position_footedness, two_foot_bonus
 
 
 def influence(teamwork, leadership, personality, position_influence_weight):
-    return personality
-    return 1 + ((teamwork + leadership) / (20 * 2)) * personality * position_influence_weight
-    
+    return personality * position_influence_weight    
 
 def scouting_report(shortlist, positions = GLOB.ALL_POSITIONS, youth_bonus = GLOB.YOUTH_BONUS):
     pos_weights = pd.read_excel(os.path.join(GLOB.MAIN_PATH, 'data', 'PosWeights.ods'), engine='odf')
@@ -109,44 +108,48 @@ def scouting_report(shortlist, positions = GLOB.ALL_POSITIONS, youth_bonus = GLO
 
         position_shortlist = shortlist.loc[shortlist['Position'].str.contains(position) | shortlist['Sec. Position'].str.contains(position)]
         
-        position_shortlist = position_shortlist.copy()
-        
-        scouting_shortlist = position_shortlist.copy()
+        if len(position_shortlist) > 0:
 
-        position_shortlist[attributes] = position_shortlist[attributes].mul(np.array(relative_weights), axis='columns', fill_value=0)
+            position_shortlist = position_shortlist.copy()
+            
+            scouting_shortlist = position_shortlist.copy()
+            
+            scouting_shortlist['GMEAN DNA'] = (gmean(1 + position_shortlist[attributes], axis=1, weights=weights[attributes].iloc[0].fillna(0)) - 1) * 5
 
-        scouting_shortlist['POSITIONAL DNA'] = position_shortlist[attributes].sum(axis=1) * 5
-        
-        scouting_shortlist['FOOT DNA'] = positional_footedness(
-            position_shortlist['Footedness'],
-            weights['Pos Footedness'].iloc[0],
-            weights['Two Foot Bonus'].iloc[0],
-            GLOB.DECAY_OPP_FOOT,
-        )
+            scouting_shortlist['WEIGHTED DNA'] = position_shortlist[attributes].mul(np.array(relative_weights), axis='columns', fill_value=0).sum(axis=1) * 5
 
-        scouting_shortlist['YOUTH DNA'] = (position_shortlist['Youth Factor'] * youth_bonus - 1)
+            scouting_shortlist['POSITIONAL DNA'] = scouting_shortlist['GMEAN DNA'] * 0.5 + scouting_shortlist['WEIGHTED DNA'] * (1 - 0.5)
+            
+            scouting_shortlist['FOOT DNA'] = positional_footedness(
+                position_shortlist['Footedness'],
+                weights['Pos Footedness'].iloc[0],
+                weights['Two Foot Bonus'].iloc[0],
+                GLOB.DECAY_OPP_FOOT,
+            )
 
-        scouting_shortlist['INFLUENCE'] = influence(
-            position_shortlist['Tea'],
-            position_shortlist['Ldr'],
-            position_shortlist['Pers. Factor'],
-            weights['Influence Weight'].iloc[0],
-        )
+            scouting_shortlist['YOUTH DNA'] = (position_shortlist['Youth Factor'] * youth_bonus - 1)
 
-        scouting_shortlist['TOTAL'] = scouting_shortlist['POSITIONAL DNA'] + scouting_shortlist['FOOT DNA'] + scouting_shortlist['YOUTH DNA'] + scouting_shortlist['INFLUENCE']
+            scouting_shortlist['INFLUENCE'] = influence(
+                position_shortlist['Tea'],
+                position_shortlist['Ldr'],
+                position_shortlist['Pers. Factor'],
+                weights['Influence Weight'].iloc[0],
+            )
 
-        info_columns = ['Name','TOTAL', 'TOTAL FOR POS', 'Age']
-        attribute_columns = list(GLOB.ATTRIBUTE_CATEGORIES.keys())
-        personality_columns = ['Personality', 'Pers. Factor']
-        dna_columns = ['POSITIONAL DNA','FOOT DNA','YOUTH DNA']
+            scouting_shortlist['TOTAL'] = scouting_shortlist['POSITIONAL DNA'] + scouting_shortlist['FOOT DNA'] + scouting_shortlist['YOUTH DNA'] + scouting_shortlist['INFLUENCE']
 
-        scouting_columns = info_columns + personality_columns + attribute_columns + dna_columns
+            info_columns = ['Name','TOTAL', 'TOTAL FOR POS', 'Age']
+            attribute_columns = list(GLOB.ATTRIBUTE_CATEGORIES.keys())
+            personality_columns = ['Personality']
+            dna_columns = ['POSITIONAL DNA', 'INFLUENCE', 'FOOT DNA','YOUTH DNA']
 
-        scouting_shortlist[attribute_columns] = scouting_shortlist[attribute_columns].applymap(lambda x: "{0:.0f}".format(x*5))
-        scouting_shortlist[dna_columns + ['TOTAL']] = scouting_shortlist[dna_columns + ['TOTAL']].applymap(lambda x: "{0:.2f}%".format(x))
-        scouting_shortlist['TOTAL FOR POS'] = position
+            scouting_columns = info_columns + personality_columns + attribute_columns + dna_columns
 
-        scouting_reports.append(scouting_shortlist)
+            scouting_shortlist[attribute_columns] = scouting_shortlist[attribute_columns].applymap(lambda x: "{0:.0f}".format(x*5))
+            scouting_shortlist[dna_columns + ['TOTAL']] = scouting_shortlist[dna_columns + ['TOTAL']].applymap(lambda x: "{0:.2f}%".format(x))
+            scouting_shortlist['TOTAL FOR POS'] = position
+
+            scouting_reports.append(scouting_shortlist)
 
     report = pd.concat(scouting_reports)
 
