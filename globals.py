@@ -4,10 +4,11 @@ MAIN_PATH = os.path.abspath((os.path.dirname( __file__ )))
 FM_PATH = '/home/ricardo/.steam/steam/steamapps/compatdata/872820/pfx/drive_c/users/steamuser/My Documents/Sports Interactive/Football Manager 2019 Touch/Untitled.html'
 
 PERSONALITY_WEIGHTS = {
-    'Model Citizen, Resolute, Model Professional, Driven, Iron Willed': 0.75,
-    'Perfectionist, Professional, Fairly Professional, Spirited, Very Ambitious, Ambitious, Determined, Fairly Determined, Charismatic Leader, Born Leader, Leader, Resilient': 0.2,
+    'Model Citizen': 2, 
+    'Resolute, Model Professional, Driven, Iron Willed': 1,
+    'Perfectionist, Professional, Fairly Professional, Spirited, Very Ambitious, Ambitious, Determined, Fairly Determined, Charismatic Leader, Born Leader, Leader, Resilient': 0.25,
     'Jovial, Light Hearted, Devoted / Very Loyal, Loyal, Fairly Loyal, Honest, Sporting, Fairly Sporting, Realist, Balanced, Fairly Ambitious, Light-Hearted': 0,
-    'Unsporting, Slack, Casual, Temperamental, Unambitious, Easily Discouraged, Low Determination, Spineless, Low Self Belief, Mercenary, Fickle': -0.75,
+    'Unsporting, Slack, Casual, Temperamental, Unambitious, Easily Discouraged, Low Determination, Spineless, Low Self Belief, Mercenary, Fickle': -1.75,
 }
 
 ATTRIBUTE_CATEGORIES = {

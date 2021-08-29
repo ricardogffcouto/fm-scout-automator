@@ -5,6 +5,7 @@ import glob
 import os
 import globals as GLOB
 
+
 def dict_weight_parser(w_dict):
     weighted_dict = {}
 
@@ -114,7 +115,7 @@ def scouting_report(shortlist, positions = GLOB.ALL_POSITIONS, youth_bonus = GLO
 
         position_shortlist[attributes] = position_shortlist[attributes].mul(np.array(relative_weights), axis='columns', fill_value=0)
 
-        scouting_shortlist['POSITIONAL DNA'] = (position_shortlist[attributes].sum(axis=1)) * 5
+        scouting_shortlist['POSITIONAL DNA'] = position_shortlist[attributes].sum(axis=1) * 5
         
         scouting_shortlist['FOOT DNA'] = positional_footedness(
             position_shortlist['Footedness'],

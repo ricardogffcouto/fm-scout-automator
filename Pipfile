@@ -18,6 +18,7 @@ jinja2 = "*"
 panel = "*"
 html5lib = "*"
 numpy = "*"
+scipy = "*"
 
 [dev-packages]
 
