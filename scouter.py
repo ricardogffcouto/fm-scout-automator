@@ -44,10 +44,16 @@ def position_to_str(pos):
         return ', '.join(player_pos)
 
 personalities = dict_weight_parser(GLOB.PERSONALITY_WEIGHTS)
+media_handlings = dict_weight_parser(GLOB.MEDIA_HANDLING_WEIGHTS)
 
 def personality_to_num(per):
-    if not pd.isna(per):
+    if not pd.isna(per) and per in personalities:
         return personalities[per]
+    return 0
+
+def media_handling_to_num(mh):
+    if not pd.isna(mh) and mh in media_handlings:
+        return media_handlings[mh]
     return 0
 
 
@@ -69,12 +75,12 @@ def get_shortlist():
         shortlist_apply_column(shortlist, 'Position', position_to_str)
         shortlist_apply_column(shortlist, 'Sec. Position', position_to_str)
         
-        shortlist['Pers. Factor'] = shortlist['Personality'].apply(personality_to_num)
+        shortlist['Pers. Factor'] = shortlist['Personality'].apply(personality_to_num) + shortlist['Media Handling'].apply(media_handling_to_num)
 
         # Adding scouting data
 
         shortlist['Footedness'] = shortlist['Right Foot'] - shortlist['Left Foot']
-        shortlist['Youth Factor'] = np.minimum(np.maximum(1 - (shortlist['Age'] - 23) / 20, 0), 1)
+        shortlist['Youth Factor'] = np.minimum(np.maximum(1 - (shortlist['Age'] - 16) / 20, 0), 1)
 
         for category in GLOB.ATTRIBUTE_CATEGORIES.keys():
             shortlist[category] = shortlist[GLOB.ATTRIBUTE_CATEGORIES[category]].sum(axis=1) / len(GLOB.ATTRIBUTE_CATEGORIES[category])
@@ -93,7 +99,23 @@ def positional_footedness(player_footedness, position_footedness, two_foot_bonus
 
 
 def influence(teamwork, leadership, personality, position_influence_weight):
-    return personality * position_influence_weight    
+    return personality * position_influence_weight
+
+def potential(total, youth_factor, personality_factor):
+    if youth_factor <= 0.7:
+        return total + personality_factor * 4
+    return 0
+
+
+
+def youth_dna(relative_youth, youth_bonus):
+    youth_steps = [0.7, 0.35]
+    if relative_youth <= youth_steps[0]:
+        return 1 + (relative_youth - youth_steps[0]) * youth_bonus
+    if relative_youth <= youth_steps[1]:
+        return (relative_youth - youth_steps[1]) / (youth_steps[0] - youth_steps[1])
+    return (relative_youth - youth_steps[1]) * youth_bonus
+
 
 def scouting_report(shortlist, positions = GLOB.ALL_POSITIONS, youth_bonus = GLOB.YOUTH_BONUS):
     pos_weights = pd.read_excel(os.path.join(GLOB.MAIN_PATH, 'data', 'PosWeights.ods'), engine='odf')
@@ -118,7 +140,7 @@ def scouting_report(shortlist, positions = GLOB.ALL_POSITIONS, youth_bonus = GLO
 
             scouting_shortlist['WEIGHTED DNA'] = position_shortlist[attributes].mul(np.array(relative_weights), axis='columns', fill_value=0).sum(axis=1) * 5
 
-            scouting_shortlist['POSITIONAL DNA'] = scouting_shortlist['GMEAN DNA'] * 0.5 + scouting_shortlist['WEIGHTED DNA'] * (1 - 0.5)
+            scouting_shortlist['POSITIONAL DNA'] = scouting_shortlist['GMEAN DNA'] * (1 - GLOB.IMPORTANCE_WEIGHTED) + scouting_shortlist['WEIGHTED DNA'] * GLOB.IMPORTANCE_WEIGHTED
             
             scouting_shortlist['FOOT DNA'] = positional_footedness(
                 position_shortlist['Footedness'],
@@ -127,7 +149,7 @@ def scouting_report(shortlist, positions = GLOB.ALL_POSITIONS, youth_bonus = GLO
                 GLOB.DECAY_OPP_FOOT,
             )
 
-            scouting_shortlist['YOUTH DNA'] = (position_shortlist['Youth Factor'] * youth_bonus - 1)
+            scouting_shortlist['YOUTH DNA'] = position_shortlist['Youth Factor'].apply(lambda x: youth_dna(x, youth_bonus))
 
             scouting_shortlist['INFLUENCE'] = influence(
                 position_shortlist['Tea'],
@@ -138,10 +160,12 @@ def scouting_report(shortlist, positions = GLOB.ALL_POSITIONS, youth_bonus = GLO
 
             scouting_shortlist['TOTAL'] = scouting_shortlist['POSITIONAL DNA'] + scouting_shortlist['FOOT DNA'] + scouting_shortlist['YOUTH DNA'] + scouting_shortlist['INFLUENCE']
 
+            scouting_shortlist['POTENTIAL'] = scouting_shortlist['TOTAL'] + (scouting_shortlist['Pers. Factor'] * 4)
+
             info_columns = ['Name','TOTAL', 'TOTAL FOR POS', 'Age']
             attribute_columns = list(GLOB.ATTRIBUTE_CATEGORIES.keys())
             personality_columns = ['Personality']
-            dna_columns = ['POSITIONAL DNA', 'INFLUENCE', 'FOOT DNA','YOUTH DNA']
+            dna_columns = ['POSITIONAL DNA', 'POTENTIAL', 'INFLUENCE', 'FOOT DNA','YOUTH DNA']
 
             scouting_columns = info_columns + personality_columns + attribute_columns + dna_columns
 

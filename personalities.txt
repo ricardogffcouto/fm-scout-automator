@@ -1,0 +1,34 @@
+Model Citizen;;Pro 18-20, Det 18-20, Pre 18-20, Amb 18-20, Loy 18-20, Spo 18-20, Tem 18-20
+Model Professional;Pro 20, Tem 10-20;;;;;;;
+Professional;;Pro 18-19, Tem 10-20;;;;;;;
+Perfectionist;;Pro 18-20, Det 18-20, Amb 18-20, Tem 1-9;;;
+Temperamental;;Tem 1-4, Pro 1-10;;;;;;
+Driven;;;Det 20, Amb 10-20;;;;;;;*16
+Determined;;Det 18-19, Amb 10-20;;;;;;;*16
+Slack;;;Pro 1, Det 1-9, Tem 5-20;;;;;
+Casual;;;Pro 2-4, Det 1-9, Tem 5-20;;;;
+Very Ambitious;;Amb 20, Loy 1-9, Det 1-17;;;2;;;*1
+Amibitous;;Amb 16-19, Loy 1-9, Det 1-17;;;2;;;*1
+Unambitious;;Amb 1-5, Loy 11-20;;;;2;;;*1
+Honest;;;Spo 20, Det 1-9, Pro 5-20;;;;;;*123
+Sporting;;Spo 18-19, Det 1-9, Pro 5-20;;;;;;*123
+Easily Discouraged;Det 1, Amb 1-9, Spo 1-17, Pro 5-20;;;;;*13
+Low Determination;Det 2-5, Amb 1-9, Spo 1-17, Pro 5-20;;;;;*13
+Unsporting;;Spo 1, Det 11-20;;;;7;;;*123
+Realist;;;Spo 2-4, Det 11-20;;;;7;;;*123
+Very Loyal;;Loy 20, Amb 6-7, Det 6-20;;;25;;;*1
+Loyal;;;Loy 18-19, Amb 6-7, Det 6-20;;;25;;;*1
+Iron Willed;;Pre 20, Det 15-20, Spo 5-20;;;7;;;*1234
+Resilient;;Pre 17-19, Det 15-20, Spo 5-20;;;7;;;*1234
+Spineless;;Pre 1, Det 1-9, Pro 5-20, Spo 1-17;;1;;;*1234
+Low Self-Belief;;Pre 2-3, Det 1-9, Pro 5-20, Spo 1-17;;1;;;*1234
+Light-Hearted;;Pre 15-20, Spo 15-20, Tem 10-20, Pro 1-17;12467;;;234
+Spirited;;Pre 15-20, Tem 10-20, Pro 11-17, Spo 1-14;14567;;;234
+Jovial;;;Pre 15-20, Tem 10-20, Pro 1-10, Spo 1-14;124567;;;234
+Resolute;;Pro 15-20, Det 15-20, Spo 5-20, Pre 1-16;7;;;12345
+Fairly Professional;Pro 15-20, Det 1-14;;;;1345;;;12345
+Fairly Determined;Det 15-20, Pro 1-14, Spo 5-20, Pre 1-16;;7;;;*2345
+Fairly Amibitous;Amb 15-20, Pro 1-14, Det 1-14;;;2345;;;*25
+Fairly Loyal;;Loy 15-20, Pro 1-14, Det 1-14, Amb 6-14;;12345;;;*45
+Fairly Sporting;;Spo 15-20, Pro 1-14, Det 1-14, Amb 1-14, Loy 1-14;1234;;;*5
+Balanced;;Pro 1-14, Det 1-14, Amb 1-14, Loy 1-14, Spo 1-14;1235;;;*35
