@@ -22,14 +22,53 @@ def move_click(coordinates):
     sleep()
 
 
+def set_screen_size():
+    print('Select screen size:')
+    print('1. 1366 x 768')
+    print('2. 1920 x 1080')
+    size = input()
+
+    while True:
+        if (size == "0" || size == "1"):
+            return size
+        print('Not a valid answer. Please select 1 or 2')
+
+
+def set_date():
+    print('Set date of shortlisting (dd-mm-yy):')
+    return input()
+
+
+SIZE = 0
 COORDINATES = {
-    'Edit search': (1836, 175),
-    'Open filters': (946, 667),
-    'Search OK': (1058, 586),
-    'FM Menu': (1647, 33),
-    'Print Screen': (1647, 451),
-    'Print to Web Page OK': (1041, 618),
-    'Print to Web Page Save': (1161, 764),
+    'Edit search': (
+        (1836, 175)
+        (1836, 175)
+    ),
+    'Open filters': (
+        (946, 667)
+        (946, 667)
+    ),
+    'Search OK': (
+        (1058, 586)
+        (1058, 586)
+    ),
+    'FM Menu': (
+        (1647, 33)
+        (1647, 33)
+    ),
+    'Print Screen': (
+        (1647, 451)
+        (1647, 451)
+    ),
+    'Print to Web Page OK': (
+        (1041, 618)
+        (1041, 618)
+    ),
+    'Print to Web Page Save': (
+        (1161, 764)
+        (1161, 764)
+    ),
 }
 
 
@@ -60,4 +99,5 @@ def import_shortlists():
             extract_shortlist(filter_id)
 
 if __name__ == '__main__':
+    SIZE = int(set_screen_size()) - 1
     import_shortlists()
