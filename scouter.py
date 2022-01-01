@@ -5,6 +5,7 @@ import glob
 import os
 import globals as GLOB
 from scipy.stats.mstats import gmean
+from hidden_rater import rate as rate_hidden
 
 
 def dict_weight_parser(w_dict):
@@ -43,18 +44,22 @@ def position_to_str(pos):
 
         return ', '.join(player_pos)
 
-personalities = dict_weight_parser(GLOB.PERSONALITY_WEIGHTS)
-media_handlings = dict_weight_parser(GLOB.MEDIA_HANDLING_WEIGHTS)
+# personalities = dict_weight_parser(GLOB.PERSONALITY_WEIGHTS)
+# media_handlings = dict_weight_parser(GLOB.MEDIA_HANDLING_WEIGHTS)
 
-def personality_to_num(per):
-    if not pd.isna(per) and per in personalities:
-        return personalities[per]
-    return 0
+# def personality_to_num(per):
+#     if not pd.isna(per) and per in personalities:
+#         return personalities[per]
+#     return 0
 
-def media_handling_to_num(mh):
-    if not pd.isna(mh) and mh in media_handlings:
-        return media_handlings[mh]
-    return 0
+# def media_handling_to_num(mh):
+#     if not pd.isna(mh) and mh in media_handlings:
+#         return media_handlings[mh]
+#     return 0
+
+
+def hidden_rating(mh, per):
+    return rate_hidden(mh, per)
 
 
 def get_shortlist():
@@ -75,7 +80,7 @@ def get_shortlist():
         shortlist_apply_column(shortlist, 'Position', position_to_str)
         shortlist_apply_column(shortlist, 'Sec. Position', position_to_str)
         
-        shortlist['Pers. Factor'] = shortlist['Personality'].apply(personality_to_num) + shortlist['Media Handling'].apply(media_handling_to_num)
+        shortlist['Pers. Factor'] = shortlist.apply(lambda x: hidden_rating(x['Media Handling'], x['Personality']), axis=1)
 
         # Adding scouting data
 
@@ -101,11 +106,11 @@ def positional_footedness(player_footedness, position_footedness, two_foot_bonus
 def influence(teamwork, leadership, personality, position_influence_weight):
     return personality * position_influence_weight
 
+
 def potential(total, youth_factor, personality_factor):
     if youth_factor <= 0.7:
         return total + personality_factor * 4
     return 0
-
 
 
 def youth_dna(relative_youth, youth_bonus):
@@ -176,6 +181,8 @@ def scouting_report(shortlist, positions = GLOB.ALL_POSITIONS, youth_bonus = GLO
             scouting_reports.append(scouting_shortlist)
 
     report = pd.concat(scouting_reports)
+
+    report['Age'] = report['Age'].astype(int)
 
     return report[scouting_columns]
 

@@ -1,31 +1,33 @@
-Out, Unf;Con 15-20, Tem 15-20, Pre 15-20;0
-Out, ST, Con;Con 15-20, Tem 1-2, Spo 1-7;0
-Out, ST;Con 15-20, Tem 1-2, Spo 8-20;0
-Out, Vol, Con;Con 15-20, Tem 3-6, Spo 1-7;0
-Out, Vol;Con 15-20, Tem 3-6, Spo 8-20;0
-Out, Con;Con 15-20, Tem 7, Spo 1-7;34
-Out;Con 15-20, Tem 7-20;34
-Eva, Unf;Con 1-14, Tem 15, Pre 15-20, Pro 15-20;0
-Eva, ST, Con ;Con 1-14, Tem 1-2, Pre 15-20, Pro 15-20, Spo 1-7;0
-Eva, ST;Con 1-14, Tem 1-2, Pre 15-20, Pro 15-20, Spo 8-20;0
-Eva, Vol, Con;Con 1-14, Tem 3-6, Pre 15-20, Pro 15-20, Spo 1-7;0
-Eva, Vol;Con 1-14, Tem 3-6, Pre 15-20, Pro 15-20, Spo 8-20;0
-Eva, Con;Con 1-14, Tem 7, Pre 15-20, Pro 15-20, Spo 1-7;0
-Eva, Res;Con 1-5, Tem 7-14, Pre 15-20, Pro 15-20;34
-Eva;Con 6-14, Tem 7-14, Pre 15-20, Pro 15-20;34
-Unf;Con 1-14, Tem 15-20, Loy 11-20, Pre 15-20, (Spo 12-20 or Pro 13-14);0
-ST, Con;Con 1-14, Tem 1-2, Loy 11-20,  Pro 13-20, Spo 1-7;1
-ST;Con 1-14, Tem 1-2, Loy 11-20, Spo 8-20, (Spo 12-20 or Pro 13-20);1
-Vol, Con;Con 1-14, Tem 3-6, Loy 11-20, Pro 13-20, Spo 1-7;1
-Vol;Con 1-14, Tem 3-6, Loy 11-20, Spo 8-20, (Spo 12-20 or Pro 13-20);1
-Con;Con 1-14, Tem 7, Loy 11-20, Pro 13-20;1
-Res;Con 1-5, Tem 7-20, Loy 11-20, Pro 15-20, Pre 1-14;13
-LH;Con 1-14, Tem 7-20, Loy 11-20, (Spo 12-20 or Pro 13-20);1345
-MF, Unf;Con 1-14, Tem 15-20, Pre 15-20;2
-MF, ST, Con;Con 1-14, Tem 1-2, Spo 1-7;12
-MF, ST;Con 1-14, Tem 1-2, Spo 8-20;12
-MF, Vol, Con;Con 1-14, Tem 3-6, Spo 1-7;12
-MF, Vol;Con 1-14, Tem 3-6, Spo 8-20;12
-MF, Con;Con 1-14, Tem 7, Spo 1-7;12
-MF, Res;Con 1-5, Tem 7-20, Pro 15-20, Loy 1-10, Pre 1-14;34
-MF;Con 1-14, Tem 7-20;12345
+Outspoken, Unflappable;Con 15-20, Tem 15-20, Pre 15-20;0
+Outspoken, Short-tempered, Confrontational;Con 15-20, Tem 1-2, Spo 1-7;0
+Outspoken, Short-tempered;Con 15-20, Tem 1-2, Spo 8-20;0
+Outspoken, Volatile, Confrontational;Con 15-20, Tem 3-6, Spo 1-7;0
+Outspoken, Volatile;Con 15-20, Tem 3-6, Spo 8-20;0
+Outspoken, Confrontational;Con 15-20, Tem 7, Spo 1-7;34
+Outspoken;Con 15-20, Tem 7-20;34
+Evasive, Unflappable;Con 1-14, Tem 15, Pre 15-20, Pro 15-20;0
+Evasive, Short-tempered, Confrontational;Con 1-14, Tem 1-2, Pre 15-20, Pro 15-20, Spo 1-7;0
+Evasive, Short-tempered;Con 1-14, Tem 1-2, Pre 15-20, Pro 15-20, Spo 8-20;0
+Evasive, Volatile, Confrontational;Con 1-14, Tem 3-6, Pre 15-20, Pro 15-20, Spo 1-7;0
+Evasive, Volatile;Con 1-14, Tem 3-6, Pre 15-20, Pro 15-20, Spo 8-20;0
+Evasive, Confrontational;Con 1-14, Tem 7, Pre 15-20, Pro 15-20, Spo 1-7;0
+Evasive, Reserved;Con 1-5, Tem 7-14, Pre 15-20, Pro 15-20;34
+Evasive;Con 6-14, Tem 7-14, Pre 15-20, Pro 15-20;34
+Unflappable;Con 1-14, Tem 15-20, Loy 11-20, Pre 15-20, (Spo 12-20 or Pro 13-14);0
+Unflappable, Media-friendly;Con 1-14, Tem 15-20, Pre 15-20;2
+Short-tempered, Confrontational;Con 1-14, Tem 1-2, Loy 11-20,  Pro 13-20, Spo 1-7;1
+Short-tempered;Con 1-14, Tem 1-2, Loy 11-20, Spo 8-20, (Spo 12-20 or Pro 13-20);1
+Volatile, Media-friendly, Confrontational;Con 1-14, Tem 7-15, Loy 11-20, Pro 13-20, Spo 1-7;1
+Volatile, Confrontational;Con 1-14, Tem 3-6, Loy 11-20, Pro 13-20, Spo 1-7;1
+Volatile;Con 1-14, Tem 3-6, Loy 11-20, Spo 8-20, (Spo 12-20 or Pro 13-20);1
+Confrontational;Con 1-14, Tem 7, Loy 11-20, Pro 13-20;1
+Reserved;Con 1-5, Tem 7-20, Loy 11-20, Pro 15-20, Pre 1-14;13
+Level-headed;Con 1-14, Tem 7-20, Loy 11-20, (Spo 12-20 or Pro 13-20);1345
+Media-friendly, Unflappable;Con 1-14, Tem 15-20, Pre 15-20;2
+Media-friendly, Short-tempered, Confrontational;Con 1-14, Tem 1-2, Spo 1-7;12
+Media-friendly, Short-tempered;Con 1-14, Tem 1-2, Spo 8-20;12
+Media-friendly, Volatile, Confrontational;Con 1-14, Tem 3-6, Spo 1-7;12
+Media-friendly, Volatile;Con 1-14, Tem 3-6, Spo 8-20;12
+Media-friendly, Confrontational;Con 1-14, Tem 7, Spo 1-7;12
+Media-friendly, Reserved;Con 1-5, Tem 7-20, Pro 15-20, Loy 1-10, Pre 1-14;34
+Media-friendly;Con 1-14, Tem 7-20;12345
